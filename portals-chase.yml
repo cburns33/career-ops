@@ -1,0 +1,217 @@
+# Portal Scanner Configuration for Chase Burns
+# Customized for digital marketing roles
+
+# -- Title filter --
+# The scanner uses these keywords to decide if a title is relevant.
+# At least 1 positive must match AND 0 negatives must match (case-insensitive).
+
+title_filter:
+  positive:
+    # [CUSTOMIZED] Digital marketing keywords for Chase
+    # -- Core Marketing Roles --
+    - "Digital Marketing"
+    - "Paid Media"
+    - "PPC"
+    - "SEM"
+    - "Search Engine Marketing"
+    - "Performance Marketing"
+    - "Growth Marketing"
+    - "Marketing Manager"
+    - "Marketing Strategist"
+    - "Campaign Manager"
+    - "Media Manager"
+    - "Acquisition Marketing"
+    - "Demand Generation"
+    - "Lead Generation"
+    - "Marketing Operations"
+    - "Marketing Automation"
+    # -- Specialized Marketing --
+    - "SEO Manager"
+    - "SEM Manager"
+    - "Paid Search"
+    - "Paid Social"
+    - "Display Advertising"
+    - "Programmatic"
+    - "Conversion Optimization"
+    - "CRO"
+    - "Marketing Analytics"
+    # -- Leadership Roles --
+    - "Head of Marketing"
+    - "Marketing Director"
+    - "Senior Marketing"
+    - "Lead Marketing"
+    # -- Related Roles --
+    - "Product Marketing"
+    - "Content Marketing"
+    - "Brand Marketing"
+    - "Email Marketing"
+    - "Social Media Marketing"
+    
+  negative:
+    # [CUSTOMIZED] Exclude roles not relevant to Chase
+    - "Junior"
+    - "Intern"
+    - "Coordinator"
+    - "Assistant"
+    - "Entry Level"
+    - "Analyst"  # Unless it's Marketing Analyst
+    - "Sales"
+    - "Business Development"
+    - "Account Executive"
+    - "Nurse"
+    - "Teacher"
+    - "Restaurant"
+    - "Customer Service"
+    - "Warehouse"
+    - "Driver"
+    - "HR"
+    - "Recruiter"
+    # Exclude ecommerce-heavy roles
+    - "Ecommerce Manager"
+    - "Amazon"
+    - "Shopify"
+    - "Product Manager"  # Unless it's Product Marketing Manager
+    # Exclude leadership roles requiring people management
+    - "Head of"
+    - "Director"
+    - "VP"
+    - "Vice President"
+    - "Chief"
+    - "CTO"
+    - "CFO"
+    - "CMO"
+    - "C-level"
+    
+  seniority_boost:
+    # These prefixes add relevance but are not required
+    - "Senior"
+    - "Principal"
+    - "Staff"
+
+# -- Tracked companies --
+# [CUSTOMIZE] Add companies you want to track. Each MUST have careers_url.
+# Set enabled: false on companies you don't care about.
+
+tracked_companies:
+  # Austin-based tech companies (good for hybrid options)
+  - name: "Dell Technologies"
+    careers_url: "https://jobs.dell.com/"
+    enabled: true
+    location: "Austin, TX"
+    
+  - name: "Indeed"
+    careers_url: "https://careers.indeed.com/"
+    enabled: true
+    location: "Austin, TX"
+    
+  - name: "Oracle"
+    careers_url: "https://www.oracle.com/corporate/careers/"
+    enabled: true
+    location: "Austin, TX"
+    
+  - name: "Meta"
+    careers_url: "https://www.metacareers.com/"
+    enabled: true
+    location: "Remote"
+    
+  - name: "Google"
+    careers_url: "https://careers.google.com/"
+    enabled: true
+    location: "Remote"
+    
+  - name: "Microsoft"
+    careers_url: "https://careers.microsoft.com/"
+    enabled: true
+    location: "Remote"
+    
+  - name: "HubSpot"
+    careers_url: "https://www.hubspot.com/careers"
+    enabled: true
+    location: "Remote"
+    
+  - name: "Salesforce"
+    careers_url: "https://www.salesforce.com/company/careers/"
+    enabled: true
+    location: "Remote"
+    
+  - name: "Adobe"
+    careers_url: "https://www.adobe.com/careers.html"
+    enabled: true
+    location: "Remote"
+    
+  - name: "Canva"
+    careers_url: "https://www.canva.com/careers"
+    enabled: true
+    location: "Remote"
+
+# -- Search queries --
+# [CUSTOMIZE] Adjust for your preferred job boards and locations
+
+search_queries:
+  # Remote-first job boards
+  - board: "We Work Remotely"
+    query: "marketing manager remote"
+    url: "https://weworkremotely.com/remote-jobs"
+    
+  - board: "Remote OK"
+    query: "digital marketing"
+    url: "https://remoteok.io/remote-marketing-jobs"
+    
+  - board: "Built In"
+    query: "digital marketing manager austin"
+    url: "https://www.builtinaustin.com/jobs"
+    
+  - board: "LinkedIn"
+    query: "\"digital marketing manager\" remote"
+    url: "https://www.linkedin.com/jobs/search"
+    
+  - board: "Indeed"
+    query: "\"paid media manager\" remote"
+    url: "https://www.indeed.com/jobs"
+    
+  - board: "AngelList"
+    query: "marketing manager"
+    url: "https://angel.co/jobs"
+    
+  # Austin-specific searches
+  - board: "Built In Austin"
+    query: "\"digital marketing\" austin"
+    url: "https://www.builtinaustin.com/jobs"
+    
+  - board: "Austin Tech Jobs"
+    query: "marketing manager"
+    url: "https://austintechjobs.com"
+
+# -- Regional preferences --
+# [CUSTOMIZE] Set your location preferences
+
+regional_filters:
+  preferred_locations:
+    - "Remote"
+    - "Austin, TX"
+    - "Texas"
+    
+  excluded_locations:
+    - "New York"
+    - "San Francisco"
+    - "Seattle"
+    - "Boston"
+    - "Chicago"
+    - "Los Angeles"
+    - "Miami"
+    - "Denver"
+    - "Portland"
+    - "Nashville"
+    - "Atlanta"
+    - "Dallas"
+    - "Houston"
+    - "Phoenix"
+    - "Philadelphia"
+    - "Washington DC"
+    - "Minneapolis"
+    - "Charlotte"
+    - "Tampa"
+    - "Orlando"
+    
+  commute_radius:
+    austin: "10 miles from 78723"
