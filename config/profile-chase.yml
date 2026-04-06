@@ -1,0 +1,90 @@
+# Career-Ops Profile Configuration for Chase Burns
+# Customized for digital marketing roles
+
+candidate:
+  full_name: "Chase Burns"
+  email: "chase.burns33@gmail.com"  # Update with your actual email
+  phone: "+1-281-467-4828"    # Update with your actual phone
+  location: "Austin, TX"
+  linkedin: "linkedin.com/in/chase-burns/"  # Update with your actual LinkedIn
+  portfolio_url: "talos-advisory.com"  # Add if you have a portfolio
+
+target_roles:
+  # Your North Star roles — what you're optimizing for
+  primary:
+    - "Digital Marketing Manager"
+    - "Paid Media Manager"
+    - "Digital Marketing Strategist"
+  # Archetypes help the evaluation system score fit
+  archetypes:
+    - name: "Digital Marketing Manager"
+      level: "Senior"
+      fit: "primary"        # primary = dream role, secondary = good fit, adjacent = stretch
+    - name: "Paid Media Manager"
+      level: "Senior"
+      fit: "primary"
+    - name: "Digital Marketing Strategist"
+      level: "Senior"
+      fit: "primary"
+    - name: "Marketing Operations Manager"
+      level: "Senior"
+      fit: "secondary"
+    - name: "Growth Marketing Manager"
+      level: "Senior"
+      fit: "secondary"
+
+narrative:
+  # Your professional headline (1 line)
+  headline: "8.5 years digital marketing expertise: SEO foundations → paid media mastery"
+  # Your exit story — what makes you unique
+  exit_story: "Started in SEO building organic growth foundations, evolved into paid media specialist managing multi-channel campaigns. Now seeking senior marketing leadership roles."
+  # Your top 3-5 superpowers
+  superpowers:
+    - "Full-funnel digital marketing strategy (SEO + paid media)"
+    - "Data-driven campaign optimization and ROI analysis"
+    - "Cross-channel campaign management and integration"
+    - "Lead generation and customer acquisition expertise"
+    - "Marketing technology stack optimization"
+  # Proof points — projects, articles, case studies with measurable impact
+  proof_points:
+    - name: "IFS MQL Growth"
+      url: ""
+      hero_metric: "90% YoY increase in MQL growth through integrated campaigns"
+    - name: "AI Librarian System"
+      url: ""
+      hero_metric: "Built custom agentic pipeline for content optimization and AI search"
+    - name: "Email Engagement"
+      url: ""
+      hero_metric: "25% increase in open rates through targeted segmentation"
+    - name: "Brand Recognition"
+      url: ""
+      hero_metric: "25% increase in brand recognition through design collateral"
+    - name: "Lead Generation"
+      url: ""
+      hero_metric: "15% increase in lead generation through targeted materials"
+  # Optional: dashboard/demo URL with credentials
+  # dashboard:
+  #   url: ""
+  #   password: ""
+
+compensation:
+  target_range: "$100K-130K"     # Your target total comp
+  currency: "USD"
+  minimum: "$90K"               # Walk-away number
+  location_flexibility: "Remote preferred, hybrid in Austin only"
+  contract_rates:
+    hourly_target: "$50-65"     # Equivalent to annual salary range
+    project_based: "Negotiable"
+
+location:
+  country: "United States"
+  city: "Austin"
+  timezone: "CST"
+  visa_status: "No sponsorship needed"
+  remote_preference: "Remote preferred"
+  hybrid_cities:
+    - "Austin, TX"
+  hybrid_constraints:
+    - "Office near 2201 Tillery St, Austin, TX 78723 preferred"
+  # For remote roles outside your country:
+  # onsite_availability: "1 week/month in any city"
