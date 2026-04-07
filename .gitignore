@@ -2,6 +2,9 @@
 data/applications.md
 data/pipeline.md
 data/scan-history.tsv
+data/connections.csv
+data/simplify-export.csv
+data/gmail-playwright-profile/
 reports/*.md
 !reports/.gitkeep
 output/*
