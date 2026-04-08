@@ -15,14 +15,14 @@ Digital marketing leader with 8+ years of experience in digital demand generatio
 **Austin, TX, USA**
 • Drove the creation and optimization of integrated marketing campaigns using Google Ads, LinkedIn Ads, and Marketo, resulting in a 90% YoY increase in MQL growth.
 • Spearheaded digital marketing operations, enhancing best practices across channels and focusing on conversion tracking, resulting in improved campaign effectiveness.
-• Collaborated with campaign managers to refine content strategies and optimize paid search efforts, ensuring alignment with sales enablement initiatives and corporate objectives.
+• Centralized global paid search operations across all regions, unifying strategy and streamlining vendor relationships, saving $100K+ annually.
 • Managed relationships with agency partners, aligning their efforts with our target market and product offerings to enhance overall marketing campaign quality.
 • Oversaw lifecycle management of AI-assisted tools like CoPilot and Writer AI agents, ensuring they met user needs while streamlining digital marketing operations.
 • Trained internal teams on AI-assisted coding solutions, establishing scalable processes that improved the quality and effectiveness of marketing campaigns, supporting sales enablement.
 
 ### Ziff Media | Senior Strategist, Digital Marketing | August 2021 - April 2023
 **Austin, TX, USA**
-• Spearheaded digital marketing initiatives for RetailMeNot, leveraging GA4 insights to inform data-driven strategies that significantly enhanced campaign performance and user engagement.
+• Managed $800K/month paid media budget for RetailMeNot, leveraging GA4 insights to inform data-driven strategies that returned a struggling account to profitability.
 • Orchestrated landing page optimization efforts by collaborating with cross-functional teams, utilizing Google Ads and Looker analytics to refine content and improve conversion rates.
 • Implemented advanced bidding strategies within Google Ads, driving effective cost management and maximizing return on digital marketing investments through strategic data analysis.
 • Championed the end-to-end development of paid search campaigns, integrating GA4 analytics to refine targeting and execution, thereby amplifying brand visibility and market reach.
