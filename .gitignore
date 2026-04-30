@@ -35,3 +35,8 @@ node_modules/
 .claude/settings.local.json
 .claude/memory/
 career-dashboard
+
+# Credentials (never commit)
+*.json
+!package.json
+!package-lock.json
