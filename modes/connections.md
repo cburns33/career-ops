@@ -37,13 +37,20 @@ If yes → run `contacto` mode with the connection's name, title, company, and t
 | "show all" / "include all companies" | `--all` |
 | "only [company]" | `--company [company]` |
 
-## Updating connections
+## Multi-CSV support
 
-When the user provides a new connections export:
-1. Copy to `data/connections.csv` (overwrite)
+Drop any number of LinkedIn Connections.csv exports into `data/connections/`
+(name files anything: `chase.csv`, `sarah.csv`, etc.).
+The script deduplicates across files by LinkedIn URL and tags each
+warm contact with the source filename so the user knows who to ask.
+
+Fallback: if `data/connections/` is empty, the script reads `data/connections.csv`.
+
+When the user provides a new export:
+1. Drop the file into `data/connections/` (or overwrite `data/connections.csv`)
 2. Re-run `node connections-match.mjs`
 3. Note any new matches vs the previous run
 
 ## Privacy note
 
-`data/connections.csv` is gitignored — it never leaves the user's machine.
+`data/connections.csv` and `data/connections/` are both gitignored -- they never leave the user's machine.
