@@ -1,4 +1,4 @@
-# Handoff — career-ops session 2026-04-30 (updated)
+# Handoff — career-ops session 2026-04-30 / 2026-05-01 (updated)
 
 ## Where we are
 
@@ -27,7 +27,22 @@ Chase is on a job search targeting Senior Digital Marketing Manager / Director r
 
 5. **Discord analysis** — read career-ops #feature-requests and #dev channels. Key finding: Hiring Cafe not discussed; LinkedIn scanner (PR #379) and ATS API crawler (Mike's 20k company list) are the most active job discovery efforts.
 
-6. **Job discovery expansion (pending task #3) — ALL COMPLETED:**
+6. **connections-match.mjs multi-CSV + scan-history extension:**
+   - `data/connections/` folder support — drop any number of friends'/colleagues' LinkedIn exports in (named anything: `chase.csv`, `sarah.csv`)
+   - Deduplicates across files by LinkedIn URL; tags each warm contact with source filename so you know who to ask
+   - Falls back to `data/connections.csv` if folder is empty
+   - Cross-references `data/scan-history.tsv` as a data source — Hiring Cafe and portal scan hits now surface as warm-contact leads
+   - Sorting: scan hits weighted highest, then applied roles, then connection count
+   - `data/connections/` added to `.gitignore`
+
+7. **gmail-rejection-scan.mjs — `--apply-excel` flag + Excel output restored:**
+   - Every scan now writes `data/rejection-scan-YYYY-MM-DD.xlsx` with two tabs: Matched Rejections + Unmatched Emails
+   - "Matched Rejections" tab includes a blank **"Mark as Rejected?"** column for review
+   - `--apply-excel` reads the latest xlsx, finds rows with `y`/`yes` in that column, surgically updates `applications.md` by `#` — no prompts
+   - `matchToTracker` now also computes `confidence` (high/medium/low) based on domain vs sender name vs subject token match
+   - Workflow: run scan → open xlsx → fill `y` → run `--apply-excel`
+
+8. **Job discovery expansion (pending task #3) — ALL COMPLETED:**
    - **PR #535 Workday API** — applied to `scan.mjs`: `detectApi()` recognises `/wday/cxs/` URL pattern, `fetchWorkdayAll()` paginates via POST (limit=20, max 5000 jobs), `parseWorkday()` extracts postings.
    - **PR #490 location filter** — applied to `scan.mjs`: `buildLocationFilter()` reads `location_filter.positive/negative` from `portals.yml`; added positive (Austin, Texas, Remote, US) and negative (Singapore, London, EMEA, etc.) lists.
    - **PR #487 --verify flag** — applied to `scan.mjs`: `verifyOffers()` launches Playwright Chromium, classifies each new offer as active/expired/dropped/invalid using `liveness-browser.mjs`; scan history records separate statuses for each outcome.
@@ -37,35 +52,15 @@ Chase is on a job search targeting Senior Digital Marketing Manager / Director r
 
 ---
 
-## Pending tasks (priority order)
+## Pending tasks
 
-### 1. --apply-excel flag for gmail-rejection-scan.mjs
-Add a "Mark as Rejected?" blank column to the Matched Rejections Excel tab. Add `--apply-excel` CLI flag that:
-- Reads the most recent `data/rejection-scan-*.xlsx`
-- Finds rows where "Mark as Rejected?" = "y" (case-insensitive)
-- For each, finds the matching row in `data/applications.md` by `#` (num column) and surgically replaces the status column with `Rejected`
-- Prints what it changed, no confirmation prompt
+**All known tasks completed.** No outstanding items.
 
-### 2. Google Sheets rows 5 + 6
-Mark Fieldwire (row 5) and Tropic (row 6) as evaluated in the intake spreadsheet (ID: `1ZFGSR1_7wJ4QQmiG_J2l4VHfxMddUT3TrlMIHbudQ3E`). Use `node sheets-update.mjs`. Cells: Sheet1!E5:F5 and Sheet1!E6:F6 → ✅ ✅.
+### Completed this session — ✅
 
-### 3. Job discovery expansion — ✅ COMPLETED
-
-All five sub-tasks done (see session notes above). Quick-start commands:
-
-```
-# Portal scanner (Greenhouse / Ashby / Lever / Workday APIs)
-node scan.mjs --dry-run
-node scan.mjs --verify      # also checks liveness
-
-# LinkedIn authenticated scanner
-node scan-auth.mjs --login linkedin   # first time only
-node scan-auth.mjs linkedin
-
-# Hiring Cafe saved-search scanner
-node hiringcafe-scan.mjs              # first time: browser opens, pass Cloudflare
-node hiringcafe-scan.mjs --apply      # write results
-```
+1. **`--apply-excel` flag** for `gmail-rejection-scan.mjs` — done (see item 8 above)
+2. **Google Sheets rows 5 + 6** — done by user
+3. **Job discovery expansion** — done
 
 ---
 
@@ -75,7 +70,8 @@ node hiringcafe-scan.mjs --apply      # write results
 |------|-------|
 | Project root | `C:\Users\chase\OneDrive\Documents\Job Application AI\career-ops` |
 | Active worktree | `.claude\worktrees\focused-ramanujan` |
-| Gmail scanner | `gmail-rejection-scan.mjs` |
+| Gmail scanner | `gmail-rejection-scan.mjs` (outputs xlsx, `--apply-excel` to apply) |
+| Connections matcher | `connections-match.mjs` (reads `data/connections/*.csv`) |
 | Sheets scripts | `sheets-auth.mjs`, `sheets-update.mjs` |
 | PDF generator | `generate-pdf.mjs` (--format=letter) |
 | Portal scanner | `scan.mjs` (Greenhouse/Ashby/Lever/Workday) |
@@ -89,6 +85,7 @@ node hiringcafe-scan.mjs --apply      # write results
 | Portals config | `portals.yml` |
 | LinkedIn profile dir | `data/linkedin-playwright-profile` |
 | Hiring Cafe profile dir | `data/hiringcafe-playwright-profile` |
+| Connections CSVs | `data/connections/` (gitignored — drop exports here) |
 
 ---
 
