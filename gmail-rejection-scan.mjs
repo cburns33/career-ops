@@ -11,8 +11,9 @@
  *   6. Optionally write updates to tracker (--apply flag)
  *
  * Usage:
- *   node gmail-rejection-scan.mjs              # dry run — show matches, don't write
- *   node gmail-rejection-scan.mjs --apply      # write Rejected status to tracker
+ *   node gmail-rejection-scan.mjs              # scan Gmail, write xlsx, don't update tracker
+ *   node gmail-rejection-scan.mjs --apply      # interactive per-match confirm + update tracker
+ *   node gmail-rejection-scan.mjs --apply-excel # read latest xlsx, mark rows with "y" as Rejected
  *   node gmail-rejection-scan.mjs --headless   # run without visible browser
  *
  * NOTE: Close all Chrome windows before running, OR use --port=9222 if Chrome
@@ -20,14 +21,19 @@
  */
 
 import { firefox } from 'playwright';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const XLSX = require('xlsx');
 
 const ROOT      = fileURLToPath(new URL('.', import.meta.url));
 const APPS_FILE = join(ROOT, 'data/applications.md');
-const APPLY     = process.argv.includes('--apply');
-const HEADLESS  = process.argv.includes('--headless');
+const APPLY       = process.argv.includes('--apply');
+const APPLY_EXCEL = process.argv.includes('--apply-excel');
+const HEADLESS    = process.argv.includes('--headless');
 const CDP_PORT  = (() => { const i = process.argv.indexOf('--port'); return i >= 0 ? parseInt(process.argv[i+1]) : null; })();
 
 // ── Gmail search queries ──────────────────────────────────────────────────────
@@ -103,6 +109,79 @@ for (const line of appLines) {
   }
 }
 console.log(`📊 Loaded ${apps.length} applications from tracker`);
+
+// ── --apply-excel mode ────────────────────────────────────────────────────────
+
+function applyExcel() {
+  const dataDir = join(ROOT, 'data');
+  const files = readdirSync(dataDir)
+    .filter(f => /^rejection-scan-\d{4}-\d{2}-\d{2}\.xlsx$/.test(f))
+    .sort()
+    .reverse();
+  if (files.length === 0) {
+    console.error('❌  No rejection-scan-*.xlsx found in data/');
+    console.error('    Run node gmail-rejection-scan.mjs first to generate the file.');
+    process.exit(1);
+  }
+  const latestFile = join(dataDir, files[0]);
+  console.log(`📂 Reading ${files[0]}`);
+
+  const wb = XLSX.readFile(latestFile);
+  const ws = wb.Sheets['Matched Rejections'];
+  if (!ws) {
+    console.error('❌  Sheet "Matched Rejections" not found in the xlsx.');
+    process.exit(1);
+  }
+
+  const rows = XLSX.utils.sheet_to_json(ws);
+  const toMark = rows.filter(r => {
+    const val = (r['Mark as Rejected?'] || '').toString().trim().toLowerCase();
+    return val === 'y' || val === 'yes';
+  });
+
+  if (toMark.length === 0) {
+    console.log('ℹ️  No rows marked "y" in "Mark as Rejected?" column.');
+    console.log('   Open the xlsx, type "y" next to rejections, save, then re-run.');
+    return;
+  }
+
+  console.log(`\n🎯 Marking ${toMark.length} application(s) as Rejected:\n`);
+  let updated = 0;
+  for (const row of toMark) {
+    const num = parseInt(row['#']);
+    if (isNaN(num)) continue;
+
+    const lineIdx = appLines.findIndex(l => {
+      const parsed = parseAppLine(l);
+      return parsed && parsed.num === num;
+    });
+
+    if (lineIdx === -1) {
+      console.warn(`  ⚠️  #${num} not found in applications.md — skipping`);
+      continue;
+    }
+
+    const app = parseAppLine(appLines[lineIdx]);
+    if (app.status === 'Rejected') {
+      console.log(`  ⏭️  #${num} ${app.company} already Rejected`);
+      continue;
+    }
+
+    appLines[lineIdx] = `| ${app.num} | ${app.date} | ${app.company} | ${app.role} | ${app.score} | Rejected | ${app.pdf} | ${app.report} | ${app.notes} |`;
+    console.log(`  ✅ #${num} ${app.company} — ${app.role} → Rejected`);
+    updated++;
+  }
+
+  if (updated > 0) {
+    writeFileSync(APPS_FILE, appLines.join('\n'));
+    console.log(`\n✅ Updated ${updated} entr${updated === 1 ? 'y' : 'ies'} in applications.md`);
+  }
+}
+
+if (APPLY_EXCEL) {
+  applyExcel();
+  process.exit(0);
+}
 
 // ── Launch browser ────────────────────────────────────────────────────────────
 
@@ -204,20 +283,22 @@ function matchToTracker(emails) {
   const seen = new Set();
 
   for (const email of emails) {
-    // Build candidate company names from this email
+    const domainCompany = companyFromEmail(email.senderEmail);
     const candidateCompanies = [
-      companyFromEmail(email.senderEmail),
+      domainCompany,
       email.senderName,
       ...companiesFromSubject(email.subject),
     ].filter(Boolean);
 
     for (const app of apps) {
-      if (app.status === 'Rejected') continue; // already marked
+      if (app.status === 'Rejected') continue;
       if (seen.has(app.num)) continue;
 
-      const matched = candidateCompanies.some(c => companiesMatch(c, app.company));
-      if (matched) {
-        matches.push({ app, email });
+      if (candidateCompanies.some(c => companiesMatch(c, app.company))) {
+        const confidence = companiesMatch(domainCompany, app.company) ? 'high'
+          : companiesMatch(email.senderName, app.company) ? 'medium'
+          : 'low';
+        matches.push({ app, email, confidence });
         seen.add(app.num);
         break;
       }
@@ -225,6 +306,42 @@ function matchToTracker(emails) {
   }
 
   return matches;
+}
+
+// ── Write Excel output ───────────────────────────────────────────────────────
+
+function writeExcel(matches, unmatched) {
+  const date = new Date().toISOString().slice(0, 10);
+
+  const matchedRows = matches.map(({ app, email, confidence }) => ({
+    'Date':              date,
+    '#':                 app.num,
+    'Company':           app.company,
+    'Role':              app.role,
+    'Current Status':    app.status,
+    'Confidence':        confidence || 'medium',
+    'Email Subject':     (email.subject || '').slice(0, 120),
+    'From':              email.senderEmail,
+    'Sender Name':       email.senderName,
+    'Mark as Rejected?': '',
+  }));
+
+  const unmatchedRows = unmatched.map(email => ({
+    'Email Subject': (email.subject || '').slice(0, 120),
+    'From':          email.senderEmail,
+    'Sender Name':   email.senderName,
+    'Snippet':       (email.snippet || '').slice(0, 200),
+  }));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(matchedRows),   'Matched Rejections');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(unmatchedRows), 'Unmatched Emails');
+
+  const outPath = join(ROOT, `data/rejection-scan-${date}.xlsx`);
+  XLSX.writeFile(wb, outPath);
+  console.log(`\n📊 Excel saved: data/rejection-scan-${date}.xlsx`);
+  console.log('   Open it, type "y" in "Mark as Rejected?" for each confirmed rejection, save, then run:');
+  console.log('   node gmail-rejection-scan.mjs --apply-excel');
 }
 
 // ── Apply updates to tracker ──────────────────────────────────────────────────
@@ -323,6 +440,8 @@ if (unmatched.length > 0) {
   }
   if (unmatched.length > 10) console.log(`   ... and ${unmatched.length - 10} more`);
 }
+
+writeExcel(matches, unmatched);
 
 await context.close().catch(() => {});
 if (browser) await browser.close().catch(() => {});
