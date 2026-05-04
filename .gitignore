@@ -6,6 +6,7 @@ data/connections.csv
 data/connections/
 data/simplify-export.csv
 data/gmail-playwright-profile/
+data/hiringcafe-playwright-profile/
 reports/*.md
 !reports/.gitkeep
 output/*
@@ -21,6 +22,7 @@ jds/*
 
 # User config and customization (never auto-updated)
 config/profile.yml
+config/profile-chase.yml
 portals.yml
 modes/_profile.md
 .update-dismissed
