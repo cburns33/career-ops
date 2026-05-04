@@ -149,16 +149,34 @@ function makeInterceptor(page) {
   async function handler(response) {
     if (captured) return;
     const url = response.url();
-    // Match any XHR/fetch to a jobs/search endpoint
-    if (!/jobs|search|postings/i.test(url)) return;
-    if (!url.includes(BASE_URL.replace('https://', ''))) return;
+    // Skip obvious static asset / analytics / image endpoints
+    if (/\.(png|jpg|jpeg|svg|gif|css|js|woff|ico)(\?|$)/i.test(url)) return;
+    if (/google-analytics|googletagmanager|sentry|cloudflare/i.test(url)) return;
 
     let body;
     try { body = await response.json(); } catch { return; }
 
-    // Must look like job results: array or object with jobs/results key
-    const jobs = body?.jobs || body?.results || body?.data || body?.postings;
-    if (!Array.isArray(jobs) && typeof jobs !== 'object') return;
+    // Look for an array of jobs in any common shape
+    const candidates = [body?.jobs, body?.results, body?.data, body?.postings,
+                       body?.hits, body?.items, Array.isArray(body) ? body : null];
+    const jobs = candidates.find(c => Array.isArray(c) && c.length > 0);
+    if (!jobs) {
+      // Verbose log for debugging — short keys only
+      if (body && typeof body === 'object') {
+        console.log(`    [debug] non-match: ${url.slice(0, 90)} keys=${Object.keys(body).slice(0,6).join(',')}`);
+      }
+      return;
+    }
+
+    // Sanity: at least one candidate looks like a job (has title/name field)
+    const sample = jobs[0];
+    if (!sample || typeof sample !== 'object') return;
+    const looksLikeJob = sample.title || sample.jobTitle || sample.name ||
+                        sample.job_title || sample.position;
+    if (!looksLikeJob) {
+      console.log(`    [debug] array but no title field at ${url.slice(0, 90)} sample-keys=${Object.keys(sample).slice(0,6).join(',')}`);
+      return;
+    }
 
     const req = response.request();
     captured = {
@@ -252,8 +270,9 @@ async function fetchNextPage(intercepted, offset) {
 }
 
 function extractJobs(body) {
+  if (Array.isArray(body)) return body;
   return body?.jobs || body?.results || body?.data || body?.postings ||
-         (Array.isArray(body) ? body : []);
+         body?.hits || body?.items || [];
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -291,6 +310,15 @@ async function main() {
       // Set up API interceptor before navigating
       const interceptor = makeInterceptor(page);
 
+      // Verbose: log ALL responses while we hunt for the API
+      const respLog = [];
+      const respLogger = (resp) => {
+        const u = resp.url();
+        if (/\.(png|jpg|jpeg|svg|gif|css|woff|ico|js|map)(\?|$)/i.test(u)) return;
+        respLog.push(`${resp.status()} ${resp.request().method()} ${u.slice(0, 160)}`);
+      };
+      page.on('response', respLogger);
+
       console.log('Navigating to saved search...');
       await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
       await page.waitForTimeout(3000);
@@ -310,17 +338,36 @@ async function main() {
         await page.waitForTimeout(2000);
       }
 
-      // Wait for the API intercept (up to 20s)
+      // Try scrolling to trigger any lazy-loaded API calls
+      await page.evaluate(() => window.scrollBy(0, 600)).catch(() => {});
+      await page.waitForTimeout(1500);
+      await page.evaluate(() => window.scrollBy(0, 600)).catch(() => {});
+
+      // Wait for the API intercept (up to 30s)
       console.log('Waiting for API response...');
       const intercepted = await Promise.race([
         interceptor.promise,
-        new Promise(r => setTimeout(() => r(null), 20_000)),
+        new Promise(r => setTimeout(() => r(null), 30_000)),
       ]);
       interceptor.stop();
+      page.off('response', respLogger);
 
       if (!intercepted) {
-        console.warn('  No API call intercepted -- DOM structure may have changed or page did not load results.');
-        console.warn('  Check the browser window and verify the search loaded results.');
+        console.warn('  No API call intercepted. Dumping all non-asset responses seen:');
+        for (const line of respLog.slice(0, 40)) console.warn('    ' + line);
+        if (respLog.length > 40) console.warn(`    ... +${respLog.length - 40} more`);
+
+        // Try reading __NEXT_DATA__ as fallback
+        const nextData = await page.evaluate(() => {
+          const el = document.getElementById('__NEXT_DATA__');
+          return el ? el.textContent : null;
+        }).catch(() => null);
+        if (nextData) {
+          console.warn(`  __NEXT_DATA__ blob found (${nextData.length} chars). First 300:`);
+          console.warn('    ' + nextData.slice(0, 300));
+        } else {
+          console.warn('  No __NEXT_DATA__ blob.');
+        }
         continue;
       }
 
