@@ -40,19 +40,6 @@ function detectApi(company) {
     return { type: 'greenhouse', url: company.api };
   }
 
-  // Workday: explicit api field with /wday/cxs/{tenant}/{site}/jobs pattern
-  if (company.api) {
-    const wd = company.api.match(/^(https?:\/\/[^/]+)\/wday\/cxs\/[^/]+\/([^/]+)\/jobs/);
-    if (wd) {
-      return { type: 'workday', url: company.api, host: wd[1], site: wd[2] };
-    }
-  }
-
-  // Lever: explicit api field
-  if (company.api && company.api.includes('api.lever.co')) {
-    return { type: 'lever', url: company.api };
-  }
-
   const url = company.careers_url || '';
 
   // Ashby
@@ -117,61 +104,20 @@ function parseLever(json, companyName) {
   }));
 }
 
-function parseWorkday(json, companyName) {
-  const postings = json.jobPostings || [];
-  const host = json._host || '';
-  const site = json._site || '';
-  return postings.map(j => ({
-    title: j.title || '',
-    url: `${host}/en-US/${site}${j.externalPath || ''}`,
-    company: companyName,
-    location: j.locationsText || '',
-  }));
-}
-
-const PARSERS = { greenhouse: parseGreenhouse, ashby: parseAshby, lever: parseLever, workday: parseWorkday };
+const PARSERS = { greenhouse: parseGreenhouse, ashby: parseAshby, lever: parseLever };
 
 // ── Fetch with timeout ──────────────────────────────────────────────
 
-async function fetchJson(url, options = {}) {
+async function fetchJson(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
+    const res = await fetch(url, { signal: controller.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } finally {
     clearTimeout(timer);
   }
-}
-
-// Workday paginates at limit=20 (hard cap). POST with empty facets to get all jobs.
-async function fetchWorkdayAll(url, host, site) {
-  const limit = 20;
-  const maxPages = 250; // safety cap: 5000 jobs per company
-  const allPostings = [];
-  let lastPageSize = 0;
-  let pages = 0;
-
-  for (let page = 0; page < maxPages; page++) {
-    const json = await fetchJson(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ appliedFacets: {}, limit, offset: page * limit, searchText: '' }),
-    });
-    const postings = json.jobPostings || [];
-    pages = page + 1;
-    if (postings.length === 0) break;
-    allPostings.push(...postings);
-    lastPageSize = postings.length;
-    if (postings.length < limit) break;
-  }
-
-  if (pages === maxPages && lastPageSize === limit) {
-    console.warn(`⚠️  Workday pagination cap (${maxPages} pages = ${maxPages * limit} jobs) reached for ${host}; additional jobs may exist`);
-  }
-
-  return { jobPostings: allPostings, _host: host, _site: site };
 }
 
 // ── Title filter ────────────────────────────────────────────────────
@@ -185,20 +131,6 @@ function buildTitleFilter(titleFilter) {
     const hasPositive = positive.length === 0 || positive.some(k => lower.includes(k));
     const hasNegative = negative.some(k => lower.includes(k));
     return hasPositive && !hasNegative;
-  };
-}
-
-function buildLocationFilter(locationFilter) {
-  const positive = (locationFilter?.positive || []).map(k => k.toLowerCase());
-  const negative = (locationFilter?.negative || []).map(k => k.toLowerCase());
-  if (positive.length === 0 && negative.length === 0) return () => true;
-
-  return (location) => {
-    if (!location) return true;
-    const lower = location.toLowerCase();
-    if (negative.some(k => lower.includes(k))) return false;
-    if (positive.length === 0) return true;
-    return positive.some(k => lower.includes(k));
   };
 }
 
@@ -284,81 +216,17 @@ function appendToPipeline(offers) {
   writeFileSync(PIPELINE_PATH, text, 'utf-8');
 }
 
-function appendToScanHistory(offers, date, status = 'added') {
+function appendToScanHistory(offers, date) {
   // Ensure file + header exist
   if (!existsSync(SCAN_HISTORY_PATH)) {
     writeFileSync(SCAN_HISTORY_PATH, 'url\tfirst_seen\tportal\ttitle\tcompany\tstatus\n', 'utf-8');
   }
 
   const lines = offers.map(o =>
-    `${o.url}\t${date}\t${o.source}\t${o.title}\t${o.company}\t${status}`
+    `${o.url}\t${date}\t${o.source}\t${o.title}\t${o.company}\tadded`
   ).join('\n') + '\n';
 
   appendFileSync(SCAN_HISTORY_PATH, lines, 'utf-8');
-}
-
-// ── Verify (--verify flag) ────────────────────────────────────────────────────
-
-// Stable codes from liveness-browser's up-front URL guard.
-const GUARD_CODES = new Set(['invalid_url', 'unsupported_protocol', 'blocked_host']);
-
-function guardStatusFor(code) {
-  if (code === 'blocked_host') return 'skipped_blocked_host';
-  return 'skipped_invalid_url';
-}
-
-async function verifyOffers(offers) {
-  let chromium;
-  let checkUrlLiveness;
-  try {
-    ({ chromium } = await import('playwright'));
-    ({ checkUrlLiveness } = await import('./liveness-browser.mjs'));
-  } catch (err) {
-    throw new Error(
-      `--verify requires Playwright with Chromium (run "npx playwright install chromium"): ${err.message}`,
-      { cause: err },
-    );
-  }
-
-  let browser;
-  try {
-    browser = await chromium.launch({ headless: true });
-  } catch (err) {
-    throw new Error(
-      `--verify could not launch Chromium (run "npx playwright install chromium" or re-run without --verify): ${err.message}`,
-      { cause: err },
-    );
-  }
-
-  const verified = [];
-  const expired = [];
-  const dropped = [];
-  const invalid = [];
-
-  try {
-    const page = await browser.newPage();
-    for (const offer of offers) {
-      const { result, code, reason } = await checkUrlLiveness(page, offer.url);
-      if (result === 'expired') {
-        expired.push({ ...offer, reason });
-        console.log(`  ❌ expired   ${offer.company} | ${offer.title} (${reason})`);
-      } else if (result === 'uncertain' && GUARD_CODES.has(code)) {
-        invalid.push({ ...offer, code, reason });
-        console.log(`  ⛔ invalid   ${offer.company} | ${offer.title} (${reason})`);
-      } else if (result === 'uncertain' && code === 'no_apply_control') {
-        dropped.push({ ...offer, reason });
-        console.log(`  ⚠️ no-apply  ${offer.company} | ${offer.title} (${reason})`);
-      } else {
-        verified.push(offer);
-        const icon = result === 'active' ? '✅' : '⚠️';
-        console.log(`  ${icon} ${result.padEnd(9)} ${offer.company} | ${offer.title}`);
-      }
-    }
-  } finally {
-    await browser.close();
-  }
-
-  return { verified, expired, dropped, invalid };
 }
 
 // ── Parallel fetch with concurrency limit ───────────────────────────
@@ -384,7 +252,6 @@ async function parallelFetch(tasks, limit) {
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
-  const verify = args.includes('--verify');
   const companyFlag = args.indexOf('--company');
   const filterCompany = companyFlag !== -1 ? args[companyFlag + 1]?.toLowerCase() : null;
 
@@ -397,7 +264,6 @@ async function main() {
   const config = parseYaml(readFileSync(PORTALS_PATH, 'utf-8'));
   const companies = config.tracked_companies || [];
   const titleFilter = buildTitleFilter(config.title_filter);
-  const locationFilter = buildLocationFilter(config.location_filter);
 
   // 2. Filter to enabled companies with detectable APIs
   const targets = companies
@@ -419,27 +285,20 @@ async function main() {
   const date = new Date().toISOString().slice(0, 10);
   let totalFound = 0;
   let totalFiltered = 0;
-  let totalLocationFiltered = 0;
   let totalDupes = 0;
   const newOffers = [];
   const errors = [];
 
   const tasks = targets.map(company => async () => {
-    const { type, url, host, site } = company._api;
+    const { type, url } = company._api;
     try {
-      const json = type === 'workday'
-        ? await fetchWorkdayAll(url, host, site)
-        : await fetchJson(url);
+      const json = await fetchJson(url);
       const jobs = PARSERS[type](json, company.name);
       totalFound += jobs.length;
 
       for (const job of jobs) {
         if (!titleFilter(job.title)) {
           totalFiltered++;
-          continue;
-        }
-        if (!locationFilter(job.location)) {
-          totalLocationFiltered++;
           continue;
         }
         if (seenUrls.has(job.url)) {
@@ -463,58 +322,21 @@ async function main() {
 
   await parallelFetch(tasks, CONCURRENCY);
 
-  // 4.5. Optional liveness verification
-  let verifiedOffers = newOffers;
-  let expiredOffers = [];
-  let droppedOffers = [];
-  let invalidOffers = [];
-  if (verify && newOffers.length > 0) {
-    console.log(`\nVerifying liveness of ${newOffers.length} new offer(s) with Playwright (sequential)...`);
-    const result = await verifyOffers(newOffers);
-    verifiedOffers = result.verified;
-    expiredOffers = result.expired;
-    droppedOffers = result.dropped;
-    invalidOffers = result.invalid;
-  }
-
   // 5. Write results
-  if (!dryRun && verifiedOffers.length > 0) {
-    appendToPipeline(verifiedOffers);
-    appendToScanHistory(verifiedOffers, date);
-  }
-  if (!dryRun && expiredOffers.length > 0) {
-    appendToScanHistory(expiredOffers, date, 'skipped_expired');
-  }
-  if (!dryRun && droppedOffers.length > 0) {
-    appendToScanHistory(droppedOffers, date, 'skipped_no_apply_control');
-  }
-  if (!dryRun && invalidOffers.length > 0) {
-    const byStatus = new Map();
-    for (const o of invalidOffers) {
-      const status = guardStatusFor(o.code);
-      if (!byStatus.has(status)) byStatus.set(status, []);
-      byStatus.get(status).push(o);
-    }
-    for (const [status, group] of byStatus) {
-      appendToScanHistory(group, date, status);
-    }
+  if (!dryRun && newOffers.length > 0) {
+    appendToPipeline(newOffers);
+    appendToScanHistory(newOffers, date);
   }
 
   // 6. Print summary
-  console.log(`\n${'═'.repeat(45)}`);
+  console.log(`\n${'━'.repeat(45)}`);
   console.log(`Portal Scan — ${date}`);
-  console.log(`${'═'.repeat(45)}`);
+  console.log(`${'━'.repeat(45)}`);
   console.log(`Companies scanned:     ${targets.length}`);
   console.log(`Total jobs found:      ${totalFound}`);
   console.log(`Filtered by title:     ${totalFiltered} removed`);
-  console.log(`Filtered by location:  ${totalLocationFiltered} removed`);
   console.log(`Duplicates:            ${totalDupes} skipped`);
-  if (verify) {
-    console.log(`Expired (verified):    ${expiredOffers.length} dropped`);
-    console.log(`No apply control:      ${droppedOffers.length} dropped`);
-    console.log(`Invalid (guarded):     ${invalidOffers.length} dropped`);
-  }
-  console.log(`New offers added:      ${verifiedOffers.length}`);
+  console.log(`New offers added:      ${newOffers.length}`);
 
   if (errors.length > 0) {
     console.log(`\nErrors (${errors.length}):`);
@@ -523,9 +345,9 @@ async function main() {
     }
   }
 
-  if (verifiedOffers.length > 0) {
+  if (newOffers.length > 0) {
     console.log('\nNew offers:');
-    for (const o of verifiedOffers) {
+    for (const o of newOffers) {
       console.log(`  + ${o.company} | ${o.title} | ${o.location || 'N/A'}`);
     }
     if (dryRun) {
