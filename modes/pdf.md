@@ -1,5 +1,19 @@
 # Modo: pdf — Generación de PDF ATS-Optimizado
 
+## Flujo preferido: generate-cv.mjs (cuando cv-master.html existe)
+
+If `templates/cv-master.html` exists (user is fully onboarded with a pre-filled template), use `generate-cv.mjs` instead of the full pipeline below. It is faster and uses far fewer tokens.
+
+1. Extract keywords from the JD
+2. Write `cv-input/{company-slug}.json` with these fields:
+   - `summary` — 3–4 line keyword-dense summary tailored to the JD
+   - `competencies` — 6–8 keyword phrases drawn from JD requirements
+   - `ifs_bullets` — 5–7 bullets for the most recent role, reordered/reworded for this JD
+   - `ziff_bullets` — 3–5 bullets for the second role, reordered/reworded for this JD
+   - `skills` — optional array of `{ "category": "...", "value": "..." }` objects; omit to use the default
+3. Run: `node generate-cv.mjs {company-slug}`
+4. Report: PDF path, pages, keyword coverage
+
 ## Pipeline completo
 
 1. Lee `cv.md` como fuentes de verdad
