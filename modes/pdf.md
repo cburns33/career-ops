@@ -63,7 +63,7 @@ Ejemplos de reformulación legítima:
 
 ## Template HTML
 
-Usar el template en `cv-template.html`. Reemplazar los placeholders `{{...}}` con contenido personalizado:
+Usar el template en `templates/cv-master.html` (Chase Burns — contenido estático pre-cargado, solo reemplazar `{{SUMMARY_TEXT}}` y `{{COMPETENCIES}}`). Para otros usuarios, usar `cv-template.html` con todos los placeholders.
 
 | Placeholder | Contenido |
 |-------------|-----------|

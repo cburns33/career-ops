@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chase Burns — CV</title>
+<style>
+  @font-face {
+    font-family: 'Space Grotesk';
+    src: url('./fonts/space-grotesk-latin.woff2') format('woff2');
+    font-weight: 300 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'Space Grotesk';
+    src: url('./fonts/space-grotesk-latin-ext.woff2') format('woff2');
+    font-weight: 300 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('./fonts/dm-sans-latin.woff2') format('woff2');
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  }
+
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('./fonts/dm-sans-latin-ext.woff2') format('woff2');
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #1a1a2e;
+    background: #ffffff;
+    padding: 0;
+    margin: 0;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2px 0;
+  }
+
+  .header { margin-bottom: 20px; }
+  .header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+  .header-gradient {
+    height: 2px;
+    background: linear-gradient(to right, hsl(187, 74%, 32%), hsl(270, 70%, 45%));
+    border-radius: 1px;
+    margin-bottom: 10px;
+  }
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: #555;
+  }
+  .contact-row a { color: #555; text-decoration: none; }
+  .contact-row .separator { color: #ccc; }
+
+  .section { margin-bottom: 18px; }
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: hsl(187, 74%, 32%);
+    border-bottom: 1.5px solid #e2e2e2;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .summary-text { font-size: 11px; line-height: 1.7; color: #2f2f2f; }
+
+  a { white-space: nowrap; }
+
+  .competencies-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .competency-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    color: hsl(187, 74%, 28%);
+    background: hsl(187, 40%, 95%);
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid hsl(187, 40%, 88%);
+  }
+
+  .job { margin-bottom: 14px; }
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .job-company {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: hsl(270, 70%, 45%);
+  }
+  .job-period { font-size: 10.5px; color: #777; white-space: nowrap; }
+  .job-role { font-size: 11px; font-weight: 600; color: #333; margin-bottom: 6px; }
+  .job-location { font-size: 10px; color: #888; }
+  .job ul { padding-left: 18px; margin-top: 6px; }
+  .job li { font-size: 10.5px; line-height: 1.6; color: #333; margin-bottom: 4px; }
+  .job li strong { font-weight: 600; }
+
+  .project { margin-bottom: 12px; }
+  .project-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: hsl(270, 70%, 45%);
+  }
+  .project-badge {
+    font-size: 9px;
+    font-weight: 500;
+    color: hsl(187, 74%, 32%);
+    background: hsl(187, 40%, 95%);
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-left: 6px;
+  }
+  .project ul { padding-left: 18px; margin-top: 6px; }
+  .project li { font-size: 10.5px; line-height: 1.6; color: #333; margin-bottom: 4px; }
+
+  .edu-item { margin-bottom: 8px; }
+  .edu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .edu-title { font-weight: 600; font-size: 11px; color: #333; }
+  .edu-org { color: hsl(270, 70%, 45%); font-weight: 500; }
+  .edu-year { font-size: 10px; color: #777; white-space: nowrap; }
+
+  .skills-grid { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .skill-item { font-size: 10.5px; color: #444; }
+  .skill-category { font-weight: 600; color: #333; font-size: 10.5px; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 0; }
+  }
+
+  .avoid-break, .job, .project, .edu-item { break-inside: avoid; page-break-inside: avoid; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER — static -->
+  <div class="header avoid-break">
+    <h1>Chase Burns</h1>
+    <div class="header-gradient"></div>
+    <div class="contact-row">
+      <span>+1 (281) 467-4828</span>
+      <span class="separator">|</span>
+      <span>chase.burns33@gmail.com</span>
+      <span class="separator">|</span>
+      <a href="https://linkedin.com/in/chase-burns">linkedin.com/in/chase-burns</a>
+      <span class="separator">|</span>
+      <span>Austin, TX</span>
+    </div>
+  </div>
+
+  <!-- PROFESSIONAL SUMMARY — variable: replace {{SUMMARY_TEXT}} -->
+  <div class="section avoid-break">
+    <div class="section-title">Professional Summary</div>
+    <div class="summary-text">{{SUMMARY_TEXT}}</div>
+  </div>
+
+  <!-- CORE COMPETENCIES — variable: replace {{COMPETENCIES}} with <span class="competency-tag">...</span> items -->
+  <div class="section">
+    <div class="section-title">Core Competencies</div>
+    <div class="competencies-grid">
+      {{COMPETENCIES}}
+    </div>
+  </div>
+
+  <!-- WORK EXPERIENCE — static -->
+  <div class="section">
+    <div class="section-title">Experience</div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="job-company">IFS</span>
+        <span class="job-period">July 2023 - January 2026</span>
+      </div>
+      <div class="job-role">Digital Marketing Manager / Internal AI Operations <span class="job-location">· Austin, TX</span></div>
+      <ul>
+        <li>Built and executed integrated marketing campaigns across Google Ads, LinkedIn Ads, and Marketo targeting enterprise buyers, achieving <strong>90% YoY growth in MQL volume</strong>.</li>
+        <li>Developed thought leadership content programs including positioning frameworks, campaign messaging, and audience-specific narratives aligned to IFS's ERP and finance automation offerings.</li>
+        <li>Engineered an AI-powered content intelligence system ("AI Librarian") that analyzed the full marketing content library, identified content gaps, and mapped existing assets to product marketing goals.</li>
+        <li>Centralized global paid search operations across all regions, unifying strategy and streamlining vendor relationships, <strong>saving $100K+ annually</strong>.</li>
+        <li>Managed agency partner relationships, aligning external teams with target audience priorities, product messaging, and campaign quality standards.</li>
+        <li>Collaborated with sales and GTM teams to develop campaign assets including sales enablement content, audience segmentation, and funnel engagement materials.</li>
+        <li>Trained internal teams on AI-assisted marketing workflows, establishing scalable processes that improved campaign quality and cross-functional efficiency.</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="job-company">Ziff Media</span>
+        <span class="job-period">August 2021 - April 2023</span>
+      </div>
+      <div class="job-role">Senior Strategist, Digital Marketing <span class="job-location">· Austin, TX</span></div>
+      <ul>
+        <li>Managed <strong>$800K/month paid media budget</strong> for RetailMeNot, using GA4 analytics to translate performance data into actionable strategy, returning the account to profitability.</li>
+        <li>Led landing page optimization in collaboration with cross-functional teams, applying analytical insights to improve content relevance and conversion rates.</li>
+        <li>Produced regular performance reporting and strategic recommendations for senior stakeholders, synthesizing multi-channel data into clear narrative insights.</li>
+        <li>Applied advanced bidding and targeting strategies to maximize ROI and brand reach across competitive digital channels.</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="job-company">Kasasa</span>
+        <span class="job-period">April 2020 - April 2021</span>
+      </div>
+      <div class="job-role">Paid Search Specialist <span class="job-location">· Austin, TX</span></div>
+      <ul>
+        <li>Designed and launched a new loans campaign program from the ground up within the SaaS/fintech sector, collaborating across product, sales, and marketing teams.</li>
+        <li>Managed a diverse portfolio of B2B and B2C paid search campaigns, optimizing performance across the full funnel.</li>
+        <li>Leveraged Salesforce and JIRA for campaign tracking and reporting, aligning marketing outputs with GTM objectives.</li>
+        <li>Served as primary client liaison, managing communication and expectations across multiple stakeholders.</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="job-company">Khoros</span>
+        <span class="job-period">April 2019 - June 2019</span>
+      </div>
+      <div class="job-role">Digital Marketing Specialist <span class="job-location">· Austin, TX</span></div>
+      <ul>
+        <li>Spearheaded email engagement programs in Marketo, achieving a <strong>25% increase in open rates</strong> through audience segmentation and targeted content strategy.</li>
+        <li>Led data accuracy initiatives with Salesforce and Airtable to improve reporting integrity and support strategic decision-making during a corporate merger.</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="job-company">Apogee Results</span>
+        <span class="job-period">September 2019 - March 2020</span>
+      </div>
+      <div class="job-role">Account Manager <span class="job-location">· Austin, TX</span></div>
+      <ul>
+        <li>Produced monthly performance reports using Google Analytics to surface KPI trends and refine client marketing strategies aligned to GTM goals.</li>
+        <li>Delivered SEO audit presentations to prospective clients using Screaming Frog, Ahrefs, and Google Analytics, translating technical data into actionable recommendations.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- PROJECTS — static -->
+  <div class="section avoid-break">
+    <div class="section-title">Projects</div>
+
+    <div class="project">
+      <div class="project-title">AI-Powered Content Intelligence System ("AI Librarian") <span class="project-badge">IFS</span></div>
+      <ul>
+        <li>Built an agent pipeline to analyze IFS's full marketing content library, identifying gaps and mapping existing assets to product marketing goals using Copilot and Azure.</li>
+        <li>Developed content scoring logic and keyword gap analysis that improved how internal stakeholders discovered and deployed content across campaigns.</li>
+      </ul>
+    </div>
+
+    <div class="project">
+      <div class="project-title">Automated Podcast-to-Content Pipeline <span class="project-badge">IFS</span></div>
+      <ul>
+        <li>Engineered an end-to-end workflow using Azure Speech Services to transcribe podcast episodes and generate newsletter content, <strong>reducing processing time by 30%</strong>.</li>
+        <li>Improved scalability of IFS's thought leadership content operations while maintaining quality and brand consistency.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- EDUCATION — static -->
+  <div class="section avoid-break">
+    <div class="section-title">Education</div>
+    <div class="edu-item">
+      <div class="edu-header">
+        <div class="edu-title"><span class="edu-org">Texas A&amp;M University</span> - Bachelor of Arts, Communications</div>
+        <div class="edu-year">December 2016</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKILLS — static -->
+  <div class="section avoid-break">
+    <div class="section-title">Skills</div>
+    <div class="skills-grid">
+      <div class="skill-item"><span class="skill-category">Platforms:</span> Google Ads, LinkedIn Ads, Marketo, HubSpot, DemandBase, Salesforce, JIRA, Asana</div>
+      <div class="skill-item"><span class="skill-category">Analytics:</span> GA4, Looker, Data Analysis, Performance Reporting</div>
+      <div class="skill-item"><span class="skill-category">SEO:</span> Screaming Frog, Ahrefs, SEMRush</div>
+      <div class="skill-item"><span class="skill-category">AI &amp; Automation:</span> Microsoft Azure, Copilot, Python, LLM Tooling, Cursor</div>
+      <div class="skill-item"><span class="skill-category">Design:</span> Adobe Photoshop, Adobe Illustrator</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
