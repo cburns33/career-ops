@@ -1,3 +1,7 @@
+# CV input files (user-specific, gitignored like other personal data)
+cv-input/*
+!cv-input/.gitkeep
+
 # Personal data (user fills these)
 data/applications.md
 data/pipeline.md

@@ -54,10 +54,13 @@ AI-powered, CLI-agnostic job search automation: pipeline tracking, offer evaluat
 | `data/pipeline.md` | Inbox of pending URLs |
 | `data/scan-history.tsv` | Scanner dedup history |
 | `portals.yml` | Query and company config |
-| `templates/cv-template.html` | HTML template for CVs |
+| `templates/cv-template.html` | HTML template for CVs (generic, all placeholders) |
+| `templates/cv-master.html` | Pre-filled CV template for the current user (static sections + variable placeholders) |
 | `templates/cv-template.tex` | LaTeX/Overleaf template for CVs |
-| `generate-pdf.mjs` | Playwright: HTML to PDF |
+| `generate-cv.mjs` | Preferred CV generator — reads `cv-input/<slug>.json`, stamps placeholders, produces HTML + PDF in one command |
+| `generate-pdf.mjs` | Playwright: HTML to PDF (called internally by generate-cv.mjs) |
 | `generate-latex.mjs` | LaTeX CV validator + pdflatex compiler |
+| `cv-input/` | Per-role JSON inputs for generate-cv.mjs (gitignored, user data) |
 | `article-digest.md` | Compact proof points from portfolio (optional) |
 | `interview-prep/story-bank.md` | Accumulated STAR+R stories across evaluations |
 | `interview-prep/{company}-{role}.md` | Company-specific interview intel reports |
